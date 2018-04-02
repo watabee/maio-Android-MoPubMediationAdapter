@@ -10,7 +10,6 @@ import jp.maio.sdk.android.MaioAds;
 import jp.maio.sdk.android.MaioAdsListener;
 
 import static com.mopub.mobileads.MaioUtils.getMoPubErrorCode;
-import static com.mopub.mobileads.MaioUtils.writeLogPreLoad;
 
 @SuppressWarnings("PointlessBooleanExpression")
 public class MaioInterstitial extends CustomEventInterstitial {
@@ -25,7 +24,6 @@ public class MaioInterstitial extends CustomEventInterstitial {
                                     Map<String, Object> localExtras,
                                     Map<String, String> serverExtras) {
         if(context instanceof Activity == false) {
-            writeLogPreLoad("Context must be type of Activity.");
             customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
             return;
         }

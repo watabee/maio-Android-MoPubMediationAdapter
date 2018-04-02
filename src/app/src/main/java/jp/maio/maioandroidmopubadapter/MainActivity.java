@@ -23,8 +23,6 @@ public class MainActivity extends AppCompatActivity implements MoPubInterstitial
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MaioUtils.IsDebug = true;
-
         MoPubRewardedVideos.initializeRewardedVideo(this);
 
         Button loadButton = findViewById(R.id.loadButton);
