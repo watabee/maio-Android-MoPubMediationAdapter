@@ -38,3 +38,16 @@ dependencies {
 
     implementation 'com.maio:android-sdk:+'
 }
+
+task deleteJar(type: Delete) {
+    delete 'libs/maio-mopub-adapter.jar'
+}
+
+task createJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('libs/')
+    include('classes.jar')
+    rename('classes.jar', 'maio-mopub-adapter.jar')
+}
+
+createJar.dependsOn(deleteJar, build)

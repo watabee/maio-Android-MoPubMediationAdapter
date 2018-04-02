@@ -42,7 +42,6 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
     @Override
     protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) throws Exception {
-        writeLogPreLoad("start initialization");
         writeDebugLog("", serverExtras.toString());
 
         if (serverExtras.size() == 0) {

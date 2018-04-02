@@ -30,24 +30,9 @@ class MaioCredentials {
         if (mediaId == null) {
             throw new IllegalArgumentException("could not obtain media ID from server extras");
         }
-        if(isValidMaioId(mediaId) == false) {
-            throw new IllegalArgumentException("media id is not a valid string");
-        }
         String zoneId = serverExtras.get(ZONE_ID);
-        if(zoneId != null && isValidMaioId(zoneId) == false) {
-            throw new IllegalArgumentException("zone id is not a valid string");
-        }
 
         return new MaioCredentials(mediaId, zoneId);
     }
 
-    private static boolean isValidMaioId(@NonNull String uuidString) {
-        if(uuidString.startsWith("Demo")) return true;
-        try {
-            @SuppressWarnings("unused") UUID uuid = UUID.fromString(uuidString);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
 }
