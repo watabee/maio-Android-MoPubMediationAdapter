@@ -47,7 +47,7 @@
     ```gradle
     dependencies {
         implementation 'com.google.android.gms:play-services-ads:+'
-        implementation 'com.maio:android-sdk:1.0.7'
+        implementation 'com.maio:android-sdk:1.0.8'
     }
     ```
     - Add the following code to `AndroidManifest.xml`
