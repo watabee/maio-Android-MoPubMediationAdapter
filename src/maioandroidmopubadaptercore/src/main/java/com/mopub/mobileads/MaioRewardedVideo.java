@@ -60,6 +60,10 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
             @Override
             public void onChangedCanShow(String zoneId, boolean canShow) {
                 if (isTargetZone(zoneId) == false) return;
+                if(!canShow) {
+                    onRewardedVideoLoadFailure(MaioRewardedVideo.class, THIRD_PARTY_ID, getMoPubErrorCode(FailNotificationReason.AD_STOCK_OUT));
+                }
+                onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
             }
 
             @Override
@@ -111,15 +115,8 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
     @Override
     protected void loadWithSdkInitialized(@NonNull Activity activity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) throws Exception {
-        if(_isInitialized == false) {
-            onRewardedVideoLoadFailure(MaioRewardedVideo.class, THIRD_PARTY_ID, MoPubErrorCode.WARMUP);
-            return;
-        }
-
-        if(MaioAds.canShow(_credentials.getZoneId())) {
+        if(_isInitialized && MaioAds.canShow(_credentials.getZoneId())) {
             onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
-        } else {
-            onRewardedVideoLoadFailure(MaioRewardedVideo.class, THIRD_PARTY_ID, MoPubErrorCode.NO_FILL);
         }
     }
 
