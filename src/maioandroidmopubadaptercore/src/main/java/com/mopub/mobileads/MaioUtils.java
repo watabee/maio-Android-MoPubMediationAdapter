@@ -10,7 +10,35 @@ import jp.maio.sdk.android.FailNotificationReason;
  * Created by ichi-dohi on 2018/02/05.
  */
 
+@SuppressWarnings("PointlessBooleanExpression")
 public class MaioUtils {
+
+    private static final boolean IS_DEVELOP = true;
+
+    static void writeDevelopLog(String tag, String message) {
+        if (IS_DEVELOP == false) {
+            return;
+        }
+
+        Log.d(tag, message);
+    }
+
+    static void trace() {
+        if (IS_DEVELOP == false) {
+            return;
+        }
+
+        if(Thread.currentThread().getStackTrace().length < 2) {
+            throw new InternalError("stack trace not enough");
+        }
+
+        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
+        String className = stackTraceElement.getClassName();
+        String methodName = stackTraceElement.getMethodName();
+
+        Log.d("[TRACE]", String.format("%s.%s", className, methodName));
+
+    }
 
     static MoPubErrorCode getMoPubErrorCode(FailNotificationReason reason) {
         switch (reason) {
