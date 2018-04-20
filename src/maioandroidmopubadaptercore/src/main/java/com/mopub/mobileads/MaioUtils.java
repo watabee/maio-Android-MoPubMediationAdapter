@@ -32,7 +32,7 @@ public class MaioUtils {
             throw new InternalError("stack trace not enough");
         }
 
-        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[2];
+        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
         String className = stackTraceElement.getClassName();
         String methodName = stackTraceElement.getMethodName();
 
