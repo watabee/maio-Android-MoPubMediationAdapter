@@ -13,7 +13,7 @@ import jp.maio.sdk.android.FailNotificationReason;
 @SuppressWarnings("PointlessBooleanExpression")
 public class MaioUtils {
 
-    private static final boolean IS_DEVELOP = true;
+    private static final boolean IS_DEVELOP = false;
 
     static void writeDevelopLog(String tag, String message) {
         if (IS_DEVELOP == false) {
