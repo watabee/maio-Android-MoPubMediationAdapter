@@ -28,7 +28,7 @@ public class MaioUtils {
             return;
         }
 
-        if(Thread.currentThread().getStackTrace().length < 2) {
+        if(Thread.currentThread().getStackTrace().length < 3) {
             throw new InternalError("stack trace not enough");
         }
 
