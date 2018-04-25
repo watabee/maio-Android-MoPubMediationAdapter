@@ -12,6 +12,7 @@ import java.util.Map;
 import jp.maio.sdk.android.FailNotificationReason;
 import jp.maio.sdk.android.MaioAds;
 import jp.maio.sdk.android.MaioAdsListener;
+import jp.maio.sdk.android.MaioAdsListenerInterface;
 
 import static com.mopub.mobileads.MaioUtils.getMoPubErrorCode;
 import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoClicked;
@@ -21,15 +22,12 @@ import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoLoadF
 import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoLoadSuccess;
 import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoStarted;
 
-// equality with booleans have meaning!
-// obviously, unused
 @SuppressWarnings({"PointlessBooleanExpression", "unused"})
 public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
     private static final String THIRD_PARTY_ID = "maio";
     private MaioCredentials _credentials;
-
-    private static boolean _isInitialized = false;
+    private MaioAdsListenerInterface _listener;
 
     @Nullable
     @Override
@@ -39,6 +37,7 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
     @Override
     protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) throws Exception {
+        MaioUtils.trace();
 
         if (serverExtras.size() == 0) {
             return false;
@@ -50,12 +49,7 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
             return false;
         }
 
-        MaioAds.init(launcherActivity, _credentials.getMediaId(), new MaioAdsListener() {
-
-            @Override
-            public void onInitialized() {
-                _isInitialized = true;
-            }
+        _listener = new MaioAdsListener() {
 
             @Override
             public void onChangedCanShow(String zoneId, boolean canShow) {
@@ -103,45 +97,68 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
                 onRewardedVideoStarted(MaioRewardedVideo.class, THIRD_PARTY_ID);
             }
-        });
+        };
+        MaioAdManager.getInstance().init(launcherActivity, _credentials.getMediaId(), _listener);
 
         return true;
     }
 
     private boolean isTargetZone(String receivedZoneId) {
+        MaioUtils.trace();
+
         String zoneId = _credentials.getZoneId();
         return zoneId == null || zoneId.equals(receivedZoneId);
     }
 
     @Override
-    protected void loadWithSdkInitialized(@NonNull Activity activity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) throws Exception {
-        if(_isInitialized && MaioAds.canShow(_credentials.getZoneId())) {
-            onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
+    protected void loadWithSdkInitialized(@NonNull Activity activity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) {
+        MaioUtils.trace();
+
+        if (MaioAdManager.getInstance().isInitialized() == false) {
+            return;
         }
+
+        if (MaioAds.canShow(_credentials.getZoneId()) == false) {
+            return;
+        }
+
+        onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
     }
 
     @NonNull
     @Override
     protected String getAdNetworkId() {
+        MaioUtils.trace();
+
         return THIRD_PARTY_ID;
     }
 
     @Override
     protected void onInvalidate() {
-        // ignored; no invalidation required
+        MaioUtils.trace();
+
+        MaioAdManager.getInstance().removeListener(_listener);
     }
 
     @Override
     protected boolean hasVideoAvailable() {
+        MaioUtils.trace();
+
         //noinspection SimplifiableIfStatement
-        if(_isInitialized == false) return false;
+        if (MaioAdManager.getInstance().isInitialized() == false) {
+            return false;
+        }
 
         return MaioAds.canShow(_credentials.getZoneId());
     }
 
     @Override
     protected void showVideo() {
-        if(_isInitialized == false) return;
+        MaioUtils.trace();
+
+        if (MaioAdManager.getInstance().isInitialized() == false) {
+            return;
+        }
 
         MaioAds.show(_credentials.getZoneId());
     }
