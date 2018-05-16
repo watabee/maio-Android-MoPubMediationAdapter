@@ -29,7 +29,7 @@ public class MaioAdManager {
     private final List<MaioAdsListenerInterface> _listeners = new ArrayList<>();
     private boolean _isInitialized = false;
 
-    public void init(@NonNull Activity activity,
+    public synchronized void init(@NonNull Activity activity,
                      @NonNull String mediaEid,
                      @NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
@@ -132,7 +132,7 @@ public class MaioAdManager {
         });
     }
 
-    private void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
+    private synchronized void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
         MaioUtils.trace();
 
         synchronized (_listeners) {
@@ -155,7 +155,7 @@ public class MaioAdManager {
         return MaioAds.canShow(zoneId);
     }
 
-    public void removeListener(@NonNull MaioAdsListenerInterface listener) {
+    public synchronized void removeListener(@NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
 
         synchronized (_listeners) {
