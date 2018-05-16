@@ -136,8 +136,10 @@ public class MaioAdManager {
         MaioUtils.trace();
 
         synchronized (_listeners) {
-            for (MaioAdsListenerInterface listener : _listeners) {
-                action.invoke(listener);
+            Object[] listeners = _listeners.toArray();
+
+            for (Object listener : listeners) {
+                action.invoke((MaioAdsListenerInterface) listener);
             }
         }
     }
