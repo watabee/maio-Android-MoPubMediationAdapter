@@ -20,7 +20,8 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
     @Override
     protected void loadInterstitial(Context context,
-                                    final CustomEventInterstitialListener customEventInterstitialListener,
+                                    final CustomEventInterstitialListener
+                                            customEventInterstitialListener,
                                     Map<String, Object> localExtras,
                                     Map<String, String> serverExtras) {
         MaioUtils.trace();
@@ -45,48 +46,51 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
             @Override
             public void onChangedCanShow(String zoneId, boolean newValue) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                if (_credentials.getZoneId() != null
+                        && !_credentials.getZoneId().equals(zoneId)) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
-                    if(newValue) {
+                if (customEventInterstitialListener != null) {
+                    if (newValue) {
                         customEventInterstitialListener.onInterstitialLoaded();
                     } else {
-                        customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.NO_FILL);
+                        customEventInterstitialListener.onInterstitialFailed(
+                                MoPubErrorCode.NO_FILL);
                     }
                 }
             }
 
             @Override
             public void onClosedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                if (_credentials.getZoneId() != null
+                        && !_credentials.getZoneId().equals(zoneId)) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialDismissed();
                 }
             }
 
             @Override
             public void onClickedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                if (_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialClicked();
                 }
             }
 
             @Override
             public void onFailed(FailNotificationReason failNotificationReason, String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                if (_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     MoPubErrorCode errorCode = getMoPubErrorCode(failNotificationReason);
                     customEventInterstitialListener.onInterstitialFailed(errorCode);
                 }
@@ -94,11 +98,11 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
             @Override
             public void onStartedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                if (_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialShown();
                 }
             }
