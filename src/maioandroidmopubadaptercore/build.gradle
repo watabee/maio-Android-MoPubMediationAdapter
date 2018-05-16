@@ -36,10 +36,12 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
-    compile('com.mopub:mopub-sdk:4.16.0@aar') {
-        transitive = true
-    }
 
+    dependencies {
+        implementation('com.mopub:mopub-sdk:5.0.0@aar') {
+            transitive = true
+        }
+    }
     implementation 'com.maio:android-sdk:+'
 }
 

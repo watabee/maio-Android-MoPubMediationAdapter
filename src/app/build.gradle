@@ -28,8 +28,11 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
 
-    compile('com.mopub:mopub-sdk:4.16.0@aar') {
-        transitive = true
+
+    dependencies {
+        implementation('com.mopub:mopub-sdk:5.0.0@aar') {
+            transitive = true
+        }
     }
-    compile project(path: ':maioandroidmopubadaptercore')
+    implementation project(path: ':maioandroidmopubadaptercore')
 }
