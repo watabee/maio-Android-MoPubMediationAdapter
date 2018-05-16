@@ -29,7 +29,9 @@ public class MaioAdManager {
     private final List<MaioAdsListenerInterface> _listeners = new ArrayList<>();
     private boolean _isInitialized = false;
 
-    public void init(@NonNull Activity activity, @NonNull String mediaEid, @NonNull MaioAdsListenerInterface listener) {
+    public void init(@NonNull Activity activity,
+                     @NonNull String mediaEid,
+                     @NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
 
         synchronized (_listeners) {
@@ -95,7 +97,10 @@ public class MaioAdManager {
             }
 
             @Override
-            public void onFinishedAd(final int playTime, final boolean skipped, final int duration, final String zoneId) {
+            public void onFinishedAd(final int playTime,
+                                     final boolean skipped,
+                                     final int duration,
+                                     final String zoneId) {
                 invokeAllListeners(new Action<MaioAdsListenerInterface>() {
                     @Override
                     public void invoke(MaioAdsListenerInterface item) {
@@ -115,7 +120,8 @@ public class MaioAdManager {
             }
 
             @Override
-            public void onFailed(final FailNotificationReason failNotificationReason, final String zoneId) {
+            public void onFailed(final FailNotificationReason failNotificationReason,
+                                 final String zoneId) {
                 invokeAllListeners(new Action<MaioAdsListenerInterface>() {
                     @Override
                     public void invoke(MaioAdsListenerInterface item) {
@@ -126,11 +132,13 @@ public class MaioAdManager {
         });
     }
 
-    private synchronized void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
+    private void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
         MaioUtils.trace();
 
-        for (MaioAdsListenerInterface listener : _listeners) {
-            action.invoke(listener);
+        synchronized (_listeners) {
+            for (MaioAdsListenerInterface listener : _listeners) {
+                action.invoke(listener);
+            }
         }
     }
 
@@ -147,10 +155,12 @@ public class MaioAdManager {
         return MaioAds.canShow(zoneId);
     }
 
-    public synchronized void removeListener(@NonNull MaioAdsListenerInterface listener) {
+    public void removeListener(@NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
 
-        _listeners.remove(listener);
+        synchronized (_listeners) {
+            _listeners.remove(listener);
+        }
     }
 
     public void show(String zoneId) {
