@@ -50,7 +50,7 @@ task deleteJar(type: Delete) {
 }
 
 task createJar(type: Copy) {
-    from('build/intermediates/bundles/release/')
+    from('build/intermediates/packaged-classes/release/')
     into('libs/')
     include('classes.jar')
     rename('classes.jar', 'maio-mopub-adapter.jar')
