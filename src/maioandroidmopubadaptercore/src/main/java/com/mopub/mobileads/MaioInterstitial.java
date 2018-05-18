@@ -6,24 +6,28 @@ import android.content.Context;
 import java.util.Map;
 
 import jp.maio.sdk.android.FailNotificationReason;
-import jp.maio.sdk.android.MaioAds;
 import jp.maio.sdk.android.MaioAdsListener;
 import jp.maio.sdk.android.MaioAdsListenerInterface;
 
-import static com.mopub.mobileads.MaioUtils.getMoPubErrorCode;
+import static com.mopub.mobileads.MaioUtils.*;
 
 @SuppressWarnings({"PointlessBooleanExpression", "unused"})
 public class MaioInterstitial extends CustomEventInterstitial {
+    private final static String TAG = "MaioInterstitial";
 
     private MaioCredentials _credentials;
     private MaioAdsListenerInterface _listener;
+    private CustomEventInterstitialListener _mopubListener;
+
+    private boolean _isAdRequested;
 
     @Override
     protected void loadInterstitial(Context context,
-                                    final CustomEventInterstitialListener customEventInterstitialListener,
+                                    final CustomEventInterstitialListener
+                                            customEventInterstitialListener,
                                     Map<String, Object> localExtras,
                                     Map<String, String> serverExtras) {
-        MaioUtils.trace();
+        trace();
 
         if (context instanceof Activity == false) {
             customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
@@ -32,61 +36,71 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
         _credentials = MaioCredentials.Create(serverExtras);
 
-        if (MaioAdManager.getInstance().isInitialized()) {
-            if (MaioAdManager.getInstance().canShow(_credentials.getZoneId())) {
-                customEventInterstitialListener.onInterstitialLoaded();
-            } else {
-                customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.NO_FILL);
-            }
-            return;
-        }
+        _isAdRequested = true;
 
         _listener = new MaioAdsListener() {
 
             @Override
             public void onChangedCanShow(String zoneId, boolean newValue) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                trace();
+
+                if (isTargetZone(zoneId) == false) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
-                    if(newValue) {
+                if (_isAdRequested == false) {
+                    return;
+                }
+                _isAdRequested = false;
+
+                if (customEventInterstitialListener != null) {
+
+                    if (newValue) {
                         customEventInterstitialListener.onInterstitialLoaded();
                     } else {
-                        customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.NO_FILL);
+                        customEventInterstitialListener.onInterstitialFailed(
+                                MoPubErrorCode.NO_FILL);
                     }
                 }
             }
 
             @Override
             public void onClosedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                trace();
+
+                if (isTargetZone(zoneId) == false) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialDismissed();
                 }
+
+                MaioAdManager.getInstance().removeListener(_listener);
             }
 
             @Override
             public void onClickedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                trace();
+
+                if (isTargetZone(zoneId) == false) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialClicked();
                 }
             }
 
             @Override
             public void onFailed(FailNotificationReason failNotificationReason, String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                trace();
+
+                if (isTargetZone(zoneId) == false) {
                     return;
                 }
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     MoPubErrorCode errorCode = getMoPubErrorCode(failNotificationReason);
                     customEventInterstitialListener.onInterstitialFailed(errorCode);
                 }
@@ -94,24 +108,38 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
             @Override
             public void onStartedAd(String zoneId) {
-                if(_credentials.getZoneId() != null && !_credentials.getZoneId().equals(zoneId)) {
+                trace();
+
+                if (isTargetZone(zoneId) == false) {
                     return;
                 }
+                writeDevelopLog(TAG, "event listener is null: "
+                        + (customEventInterstitialListener == null));
 
-                if(customEventInterstitialListener != null) {
+                if (customEventInterstitialListener != null) {
                     customEventInterstitialListener.onInterstitialShown();
                 }
             }
         };
         MaioAdManager.getInstance().init((Activity) context, _credentials.getMediaId(), _listener);
+
+        if (MaioAdManager.getInstance().isInitialized()
+                && MaioAdManager.getInstance().canShow(_credentials.getZoneId())) {
+            customEventInterstitialListener.onInterstitialLoaded();
+            _isAdRequested = false;
+        }
     }
 
     @Override
     protected void showInterstitial() {
-        MaioUtils.trace();
+        trace();
 
         if (MaioAdManager.getInstance().isInitialized() == false) {
             return;
+        }
+
+        if (MaioAdManager.getInstance().canShow(_credentials.getZoneId()) == false) {
+            _mopubListener.onInterstitialFailed(getMoPubErrorCode(FailNotificationReason.VIDEO));
         }
 
         MaioAdManager.getInstance().show(_credentials.getZoneId());
@@ -119,8 +147,15 @@ public class MaioInterstitial extends CustomEventInterstitial {
 
     @Override
     protected void onInvalidate() {
-        MaioUtils.trace();
+        trace();
 
         MaioAdManager.getInstance().removeListener(_listener);
+    }
+
+    private boolean isTargetZone(String receivedZoneId) {
+        trace();
+
+        String zoneId = _credentials.getZoneId();
+        return zoneId == null || zoneId.equals(receivedZoneId);
     }
 }

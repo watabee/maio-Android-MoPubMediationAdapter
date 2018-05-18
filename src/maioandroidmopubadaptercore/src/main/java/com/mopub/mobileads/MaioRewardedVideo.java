@@ -3,6 +3,7 @@ package com.mopub.mobileads;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.mopub.common.LifecycleListener;
 import com.mopub.common.MoPubReward;
@@ -15,19 +16,13 @@ import jp.maio.sdk.android.MaioAdsListener;
 import jp.maio.sdk.android.MaioAdsListenerInterface;
 
 import static com.mopub.mobileads.MaioUtils.getMoPubErrorCode;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoClicked;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoClosed;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoCompleted;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoLoadFailure;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoLoadSuccess;
-import static com.mopub.mobileads.MoPubRewardedVideoManager.onRewardedVideoStarted;
 
 @SuppressWarnings({"PointlessBooleanExpression", "unused"})
 public class MaioRewardedVideo extends CustomEventRewardedVideo {
 
-    private static final String THIRD_PARTY_ID = "maio";
     private MaioCredentials _credentials;
-    private MaioAdsListenerInterface _listener;
+    private final static Object _adRequestLockObject = new Object();
+    private static boolean _isAdRequested = false;
 
     @Nullable
     @Override
@@ -36,7 +31,10 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
     }
 
     @Override
-    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) throws Exception {
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity,
+                                            @NonNull Map<String, Object> localExtras,
+                                            @NonNull Map<String, String> serverExtras)
+            throws Exception {
         MaioUtils.trace();
 
         if (serverExtras.size() == 0) {
@@ -49,56 +47,97 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
             return false;
         }
 
-        _listener = new MaioAdsListener() {
+        MaioAdsListenerInterface listener = new MaioAdsListener() {
 
             @Override
             public void onChangedCanShow(String zoneId, boolean canShow) {
-                if (isTargetZone(zoneId) == false) return;
-                if(!canShow) {
-                    onRewardedVideoLoadFailure(MaioRewardedVideo.class, THIRD_PARTY_ID, getMoPubErrorCode(FailNotificationReason.AD_STOCK_OUT));
+                MaioUtils.trace();
+
+                if (isTargetZone(zoneId) == false) {
+                    return;
                 }
-                onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
+
+                synchronized (_adRequestLockObject) {
+                    Log.d("[MAIO]", "isAdRequested: " + _isAdRequested);
+                    if (_isAdRequested == false) {
+                        return;
+                    }
+                    _isAdRequested = false;
+                }
+
+                if (canShow == false) {
+                    MoPubRewardedVideoManager.onRewardedVideoLoadFailure(MaioRewardedVideo.class,
+                            _credentials.getZoneId(),
+                            getMoPubErrorCode(FailNotificationReason.AD_STOCK_OUT));
+                } else {
+                    MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(MaioRewardedVideo.class,
+                            _credentials.getZoneId());
+                }
             }
 
             @Override
             public void onClickedAd(String zoneId) {
-                if (isTargetZone(zoneId) == false) return;
-                onRewardedVideoClicked(MaioRewardedVideo.class, THIRD_PARTY_ID);
+                MaioUtils.trace();
+
+                if (isTargetZone(zoneId) == false) {
+                    return;
+                }
+                MoPubRewardedVideoManager.onRewardedVideoClicked(MaioRewardedVideo.class,
+                        _credentials.getZoneId());
             }
 
             @Override
             public void onClosedAd(String zoneId) {
+                MaioUtils.trace();
+
                 if (isTargetZone(zoneId) == false) return;
 
-                onRewardedVideoClosed(MaioRewardedVideo.class, THIRD_PARTY_ID);
+                MoPubRewardedVideoManager.onRewardedVideoClosed(MaioRewardedVideo.class,
+                        _credentials.getZoneId());
+                // Invalidate could not be trusted
+                MaioAdManager.getInstance().removeListener(this);
             }
 
             @Override
-            public void onFinishedAd(int playtime, boolean skipped, int duration, String zoneId) {
+            public void onFinishedAd(int playtime,
+                                     boolean skipped,
+                                     int duration,
+                                     String zoneId) {
+                MaioUtils.trace();
+
                 if (isTargetZone(zoneId) == false) return;
 
                 MoPubReward reward = skipped
                         ? MoPubReward.failure()
                         : MoPubReward.success("", 0);
-                onRewardedVideoCompleted(MaioRewardedVideo.class, THIRD_PARTY_ID, reward);
+                MoPubRewardedVideoManager.onRewardedVideoCompleted(MaioRewardedVideo.class,
+                        _credentials.getZoneId(),
+                        reward);
             }
 
             @Override
             public void onFailed(FailNotificationReason failNotificationReason, String zoneId) {
+                MaioUtils.trace();
+
                 if (isTargetZone(zoneId) == false) return;
 
                 MoPubErrorCode errorCode = getMoPubErrorCode(failNotificationReason);
-                onRewardedVideoLoadFailure(MaioRewardedVideo.class, THIRD_PARTY_ID, errorCode);
+                MoPubRewardedVideoManager.onRewardedVideoLoadFailure(MaioRewardedVideo.class,
+                        _credentials.getZoneId(),
+                        errorCode);
             }
 
             @Override
             public void onStartedAd(String zoneId) {
+                MaioUtils.trace();
+
                 if (isTargetZone(zoneId) == false) return;
 
-                onRewardedVideoStarted(MaioRewardedVideo.class, THIRD_PARTY_ID);
+                MoPubRewardedVideoManager.onRewardedVideoStarted(MaioRewardedVideo.class,
+                        _credentials.getZoneId());
             }
         };
-        MaioAdManager.getInstance().init(launcherActivity, _credentials.getMediaId(), _listener);
+        MaioAdManager.getInstance().init(launcherActivity, _credentials.getMediaId(), listener);
 
         return true;
     }
@@ -111,8 +150,14 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
     }
 
     @Override
-    protected void loadWithSdkInitialized(@NonNull Activity activity, @NonNull Map<String, Object> localExtras, @NonNull Map<String, String> serverExtras) {
+    protected void loadWithSdkInitialized(@NonNull Activity activity,
+                                          @NonNull Map<String, Object> localExtras,
+                                          @NonNull Map<String, String> serverExtras) {
         MaioUtils.trace();
+
+        synchronized (_adRequestLockObject) {
+            _isAdRequested = true;
+        }
 
         if (MaioAdManager.getInstance().isInitialized() == false) {
             return;
@@ -122,7 +167,14 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
             return;
         }
 
-        onRewardedVideoLoadSuccess(MaioRewardedVideo.class, THIRD_PARTY_ID);
+        if (MaioAds.canShow(_credentials.getZoneId())) {
+            MoPubRewardedVideoManager.onRewardedVideoLoadSuccess(MaioRewardedVideo.class,
+                    _credentials.getZoneId());
+
+            synchronized (_adRequestLockObject) {
+                _isAdRequested = false;
+            }
+        }
     }
 
     @NonNull
@@ -130,14 +182,12 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
     protected String getAdNetworkId() {
         MaioUtils.trace();
 
-        return THIRD_PARTY_ID;
+        return _credentials.getZoneId();
     }
 
     @Override
     protected void onInvalidate() {
         MaioUtils.trace();
-
-        MaioAdManager.getInstance().removeListener(_listener);
     }
 
     @Override

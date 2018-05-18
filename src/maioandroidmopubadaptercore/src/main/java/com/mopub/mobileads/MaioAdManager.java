@@ -10,6 +10,7 @@ import jp.maio.sdk.android.FailNotificationReason;
 import jp.maio.sdk.android.MaioAds;
 import jp.maio.sdk.android.MaioAdsListenerInterface;
 
+@SuppressWarnings("PointlessBooleanExpression")
 public class MaioAdManager {
 
     private MaioAdManager() {
@@ -24,15 +25,23 @@ public class MaioAdManager {
         return _instance;
     }
 
-
     private static MaioAdManager _instance;
-    private List<MaioAdsListenerInterface> _listeners = new ArrayList<>();
+    private final List<MaioAdsListenerInterface> _listeners = new ArrayList<>();
     private boolean _isInitialized = false;
 
-    public void init(@NonNull Activity activity, @NonNull String mediaEid, @NonNull MaioAdsListenerInterface listener) {
+    public synchronized void init(@NonNull Activity activity,
+                     @NonNull String mediaEid,
+                     @NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
 
-        _listeners.add(listener);
+        synchronized (_listeners) {
+            // Always update the listener list when init is called,
+            // unless the listener is identical.
+            if(_listeners.contains(listener) == false) {
+                _listeners.add(listener);
+            }
+        }
+
         if (_isInitialized) return;
 
         MaioAds.init(activity, mediaEid, new MaioAdsListenerInterface() {
@@ -88,7 +97,10 @@ public class MaioAdManager {
             }
 
             @Override
-            public void onFinishedAd(final int playTime, final boolean skipped, final int duration, final String zoneId) {
+            public void onFinishedAd(final int playTime,
+                                     final boolean skipped,
+                                     final int duration,
+                                     final String zoneId) {
                 invokeAllListeners(new Action<MaioAdsListenerInterface>() {
                     @Override
                     public void invoke(MaioAdsListenerInterface item) {
@@ -108,7 +120,8 @@ public class MaioAdManager {
             }
 
             @Override
-            public void onFailed(final FailNotificationReason failNotificationReason, final String zoneId) {
+            public void onFailed(final FailNotificationReason failNotificationReason,
+                                 final String zoneId) {
                 invokeAllListeners(new Action<MaioAdsListenerInterface>() {
                     @Override
                     public void invoke(MaioAdsListenerInterface item) {
@@ -119,11 +132,15 @@ public class MaioAdManager {
         });
     }
 
-    private void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
+    private synchronized void invokeAllListeners(Action<MaioAdsListenerInterface> action) {
         MaioUtils.trace();
 
-        for (MaioAdsListenerInterface listener : _listeners) {
-            action.invoke(listener);
+        synchronized (_listeners) {
+            Object[] listeners = _listeners.toArray();
+
+            for (Object listener : listeners) {
+                action.invoke((MaioAdsListenerInterface) listener);
+            }
         }
     }
 
@@ -140,10 +157,12 @@ public class MaioAdManager {
         return MaioAds.canShow(zoneId);
     }
 
-    public void removeListener(@NonNull MaioAdsListenerInterface listener) {
+    public synchronized void removeListener(@NonNull MaioAdsListenerInterface listener) {
         MaioUtils.trace();
 
-        _listeners.remove(listener);
+        synchronized (_listeners) {
+            _listeners.remove(listener);
+        }
     }
 
     public void show(String zoneId) {
