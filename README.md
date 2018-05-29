@@ -52,18 +52,16 @@
     ```
     - Add the following code to `AndroidManifest.xml`
     ```xml
-    <activity
-        android:name="jp.maio.sdk.android.AdFullscreenActivity"
-        android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
-        android:hardwareAccelerated="true"
-        android:label="maiosdk"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
-    <intent-filter>
-                    <data android:scheme="jp.maio.sdk.android"/>
-                    <action android:name="android.intent.action.VIEW" />
-                    <category android:name="android.intent.category.DEFAULT" />
-                    <category android:name="android.intent.category.BROWSABLE" />
-                </intent-filter>
+    <activity  
+              android:name="jp.maio.sdk.android.AdFullscreenActivity"  
+              android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"  
+              android:hardwareAccelerated="true"  
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >  
+    </activity>
+    <activity            
+              android:name="jp.maio.sdk.android.HtmlBasedAdActivity"            
+              android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"            
+              android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
     </activity>
     ```
 1. Go to the [release page](https://github.com/imobile-maio/maio-Android-MoPubMediationAdapter/releases) and download the newest `MaioMoPubAdapter_v*.*.*.jar`.
