@@ -11,11 +11,16 @@ import com.mopub.common.MoPub;
 import com.mopub.common.MoPubReward;
 import com.mopub.common.SdkConfiguration;
 import com.mopub.common.SdkInitializationListener;
+import com.mopub.common.logging.MoPubLog;
+import com.mopub.mobileads.MaioAdapterConfiguration;
 import com.mopub.mobileads.MoPubErrorCode;
 import com.mopub.mobileads.MoPubInterstitial;
 import com.mopub.mobileads.MoPubRewardedVideoListener;
 import com.mopub.mobileads.MoPubRewardedVideos;
+import com.mopub.mobileads.MoPubView;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity
@@ -26,20 +31,35 @@ public class MainActivity
     private final String AD_UNIT_ID_INTER = "9052a031590f49aca475b099c9c4f62a";
     private MoPubInterstitial _moPubInterstitial;
 
+    private SdkInitializationListener initSdkListener() {
+        return new SdkInitializationListener() {
+            @Override
+            public void onInitializationFinished() {
+           /* MoPub SDK initialized.
+           Check if you should show the consent dialog here, and make your ad requests. */
+            }
+        };
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MoPub.initializeSdk(this,
-                new SdkConfiguration.Builder(AD_UNIT_ID).build(),
-                new SdkInitializationListener() {
-                    @Override
-                    public void onInitializationFinished() {
-                        Log.d("DEBUG", "onInitializationFinished");
-                    }
-                }
-        );
+        // configurations required to initialize
+        Map<String, String> mediatedNetworkConfiguration = new HashMap<>();
+        mediatedNetworkConfiguration.put("MEDIA_ID", "DemoPublisherMediaForAndroid");
+        mediatedNetworkConfiguration.put("ZONE_ID", "DemoPublisherZoneForAndroid");
+
+
+        SdkConfiguration sdkConfiguration = new SdkConfiguration.Builder(AD_UNIT_ID)
+                .withAdditionalNetwork("com.mopub.mobileads.MaioAdapterConfiguration")
+                .withMediatedNetworkConfiguration("com.mopub.mobileads.MaioAdapterConfiguration", mediatedNetworkConfiguration)
+                .withLogLevel(MoPubLog.LogLevel.DEBUG)
+                .withLegitimateInterestAllowed(false)
+                .build();
+
+        MoPub.initializeSdk(this, sdkConfiguration, initSdkListener());
 
         Button loadButton = findViewById(R.id.loadButton);
         loadButton.setOnClickListener(new View.OnClickListener() {
