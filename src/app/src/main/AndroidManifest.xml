@@ -29,19 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="jp.maio.sdk.android.AdFullscreenActivity"
-            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize"
-            android:hardwareAccelerated="true"
-            android:label="maiosdk"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
-            <intent-filter>
-                <data android:scheme="jp.maio.sdk.android"/>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-        </activity>
     </application>
 
 
