@@ -6,7 +6,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.mopub.common.LifecycleListener;
+import com.mopub.common.MoPub;
 import com.mopub.common.MoPubReward;
+import com.mopub.common.privacy.PersonalInfoManager;
 
 import java.util.Map;
 
@@ -36,6 +38,14 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
                                             @NonNull Map<String, String> serverExtras)
             throws Exception {
         MaioUtils.trace();
+
+
+        // If GDPR is required do not initialize SDK
+        PersonalInfoManager personalInfoManager = MoPub.getPersonalInformationManager();
+
+        if (personalInfoManager != null && personalInfoManager.gdprApplies() == Boolean.TRUE) {
+            return false;
+        }
 
         if (serverExtras.size() == 0) {
             return false;

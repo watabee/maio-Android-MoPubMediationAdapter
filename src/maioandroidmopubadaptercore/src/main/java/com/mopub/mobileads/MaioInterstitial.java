@@ -3,6 +3,9 @@ package com.mopub.mobileads;
 import android.app.Activity;
 import android.content.Context;
 
+import com.mopub.common.MoPub;
+import com.mopub.common.privacy.PersonalInfoManager;
+
 import java.util.Map;
 
 import jp.maio.sdk.android.FailNotificationReason;
@@ -28,6 +31,13 @@ public class MaioInterstitial extends CustomEventInterstitial {
                                     Map<String, Object> localExtras,
                                     Map<String, String> serverExtras) {
         trace();
+
+        // If GDPR is required do not initialize SDK
+        PersonalInfoManager personalInfoManager = MoPub.getPersonalInformationManager();
+
+        if (personalInfoManager != null && personalInfoManager.gdprApplies() == Boolean.TRUE) {
+            return;
+        }
 
         if (context instanceof Activity == false) {
             customEventInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
