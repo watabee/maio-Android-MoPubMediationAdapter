@@ -21,7 +21,7 @@ import static com.mopub.common.logging.MoPubLog.SdkLogEvent.CUSTOM_WITH_THROWABL
 public class MaioAdapterConfiguration extends BaseAdapterConfiguration {
 
     // Adapter's keys
-    private static final String ADAPTER_VERSION = BuildConfig.VERSION_NAME;
+    private static final String ADAPTER_VERSION = "1.1.7.0";
     private static final String ADAPTER_NAME = MaioAdapterConfiguration.class.getSimpleName();
     private static final String MOPUB_NETWORK_NAME = "maio";
 
