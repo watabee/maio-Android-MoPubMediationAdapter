@@ -165,6 +165,9 @@ public class MaioInterstitial extends CustomEventInterstitial {
     private boolean isTargetZone(String receivedZoneId) {
         trace();
 
+        if(_credentials == null){
+            return true;
+        }
         String zoneId = _credentials.getZoneId();
         return zoneId == null || zoneId.equals(receivedZoneId);
     }
