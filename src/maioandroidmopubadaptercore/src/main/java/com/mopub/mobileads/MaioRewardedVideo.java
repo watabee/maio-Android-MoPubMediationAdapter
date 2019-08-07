@@ -192,7 +192,7 @@ public class MaioRewardedVideo extends CustomEventRewardedVideo {
     protected String getAdNetworkId() {
         MaioUtils.trace();
 
-        return _credentials.getZoneId();
+        return _credentials == null ? "MAIO No Zone" : _credentials.getZoneId();
     }
 
     @Override
