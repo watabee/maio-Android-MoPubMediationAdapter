@@ -27,8 +27,8 @@ public class MainActivity
         extends AppCompatActivity
         implements MoPubInterstitial.InterstitialAdListener, MoPubRewardedVideoListener {
 
-    private final String AD_UNIT_ID = "fcf07a6802db40cfa0ce0c249f7c2b52";
-    private final String AD_UNIT_ID_INTER = "9052a031590f49aca475b099c9c4f62a";
+    private final String AD_UNIT_ID = "SET_YOUR_AD_UNIT_ID";
+    private final String AD_UNIT_ID_INTER = "SET_YOUR_AD_UNIT_ID";
     private MoPubInterstitial _moPubInterstitial;
 
     private SdkInitializationListener initSdkListener() {
