@@ -1,0 +1,14 @@
+apply plugin: 'maven'
+
+def repo = new File(rootDir, "repository")
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository url: "file://${repo.absolutePath}"
+            pom.version = "1.1.9.1"
+            pom.groupId = "jp.maio"
+            pom.artifactId = "maio-android-mopub-adapter"
+        }
+    }
+}

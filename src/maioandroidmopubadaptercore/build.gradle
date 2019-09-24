@@ -57,3 +57,5 @@ task createJar(type: Copy) {
 }
 
 createJar.dependsOn(deleteJar, build)
+
+apply from: 'upload.gradle'
